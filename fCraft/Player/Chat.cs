@@ -218,7 +218,6 @@ namespace fCraft {
         internal static RawMessageType GetRawMessageType( [NotNull] string message ) {
             if( message == null ) throw new ArgumentNullException( "message" );
             if( message.Length == 0 ) return RawMessageType.Invalid;
-            if( message.EndsWith( " /" ) ) return RawMessageType.PartialMessage;
 
             switch( message[0] ) {
                 case '/':

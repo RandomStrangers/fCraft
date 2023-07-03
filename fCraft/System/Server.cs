@@ -25,10 +25,10 @@ namespace fCraft {
     /// sessions, global events and scheduled tasks. </summary>
     public static partial class Server {
         /// <summary> *** DO NOT USE THIS! *** Use VersionString, as this field is a constant and is inlined if used. </summary>
-        public const string InternalVersion = "0.6.4.5";
+        public const string InternalVersion = "0.6.4.6";
         public static string Version { get { return InternalVersion; } }
 
-        public static string SoftwareName = "&4F&eC&aR&2A&bF&3T &70.6.4.5";
+        public static string SoftwareName = "&4F&eC&aR&2A&bF&3T &70.6.4.6";
         static string fullName;
         public static string SoftwareNameVersioned
         {
@@ -38,7 +38,7 @@ namespace fCraft {
         }
 
         /// <summary> Software name that shows up on the server list on classicube.</summary>
-        public static string Software = "&4F&eC&aR&2A&bF&3T &70.6.4.5";
+        public static string Software = "&4F&eC&aR&2A&bF&3T &70.6.4.6";
 
         /// <summary> Time when the server started (UTC). Used to check uptime. </summary>
         public static DateTime StartTime { get; private set; }

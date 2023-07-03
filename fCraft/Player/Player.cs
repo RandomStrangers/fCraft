@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection.Emit;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using fCraft.Drawing;
@@ -32,7 +35,116 @@ namespace fCraft {
     /// <summary> Object representing volatile state ("session") of a connected player.
     /// For persistent state of a known player account, see PlayerInfo. </summary>
     public sealed partial class Player : IClassy {
+        internal bool dontmindme = false;
+        public static string appName;
+        public int extensionCount;
+        public List<string> extensions = new List<string>();
+        public int customBlockSupportLevel;
+        public bool extension;
+        public bool loggedIn;
+        public static int NTHO_Int(byte[] x, int offset)
+        {
+            byte[] y = new byte[4];
+            Buffer.BlockCopy(x, offset, y, 0, 4); Array.Reverse(y);
+            return BitConverter.ToInt32(y, 0);
+        }
+        public void HandleCustomBlockSupportLevel(byte[] message)
+        {
+            customBlockSupportLevel = message[0];
+        }
+        static System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+        static MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+        byte[] HandleMessage(byte[] buffer)
+        {
+            try
+            {
+                int length = 0; byte msg = buffer[0];
+                // Get the length of the message by checking the first byte
+                switch (msg)
+                {
+                    case 0:
+                        length = 130;
+                        break; // login
+                    case 5:
+                        if (!loggedIn)
+                            goto default;
+                        length = 8;
+                        break; // blockchange
+                    case 8:
+                        if (!loggedIn)
+                            goto default;
+                        length = 9;
+                        break; // input
+                    case 13:
+                        if (!loggedIn)
+                            goto default;
+                        length = 65;
+                        break; // chat
+                    case 16:
+                        length = 66;
+                        break;
+                    case 17:
+                        length = 68;
+                        break;
+                    case 19:
+                        length = 1;
+                        break;
+                    default:
+                        if (!dontmindme)
+                            Kick("Unhandled message id \"" + msg + "\"!", LeaveReason);
+                        else
+                            Logger.Log(LogType.Error, Encoding.UTF8.GetString(buffer, 0, buffer.Length)) ;
+                        return new byte[0];
+                }
+                if (buffer.Length > length)
+                {
+                    byte[] message = new byte[length];
+                    Buffer.BlockCopy(buffer, 1, message, 0, length);
 
+                    byte[] tempbuffer = new byte[buffer.Length - length - 1];
+                    Buffer.BlockCopy(buffer, length + 1, tempbuffer, 0, buffer.Length - length - 1);
+
+                    buffer = tempbuffer;
+
+                    // Thread thread = null;
+                    switch (msg)
+                    {
+                        case 16:
+                            HandleExtInfo(message);
+                            break;
+                        case 17:
+                            HandleExtEntry(message);
+                            break;
+                        case 19:
+                            HandleCustomBlockSupportLevel(message);
+                            break;
+                    }
+                    //thread.Start((object)message);
+                    if (buffer.Length > 0)
+                        buffer = HandleMessage(buffer);
+                    else
+                        return new byte[0];
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.Log(LogType.Error, "ERROR WITH Player.cs");
+            }
+            return buffer;
+        }
+
+        public void HandleExtInfo(byte[] message)
+        {
+            appName = enc.GetString(message, 0, 64).Trim();
+            extensionCount = message[65];
+        }
+        public struct CPE { public string name; public int version; }
+        public List<CPE> ExtEntry = new List<CPE>();
+        void HandleExtEntry(byte[] msg)
+        {
+            AddExtension(enc.GetString(msg, 0, 64).Trim(), NTHO_Int(msg, 64));
+            extensionCount--;
+        }
         /// <summary> The godly pseudo-player for commands called from the server console.
         /// Console has all the permissions granted.
         /// Note that Player.Console.World is always null,
@@ -606,7 +718,7 @@ namespace fCraft {
         }
 
 
-        const int MatchesToPrint = 30;
+        const int MatchesToPrint = int.MaxValue;
 
         /// <summary> Prints a comma-separated list of matches (up to 30): "More than one ___ matched: ___, ___, ..." </summary>
         /// <param name="itemType"> Type of item in the list. Should be singular (e.g. "player" or "world"). </param>

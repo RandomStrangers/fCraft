@@ -192,8 +192,15 @@
     <Compile Include="MapGeneration\RealisticMapGenBlockTheme.cs" />
     <Compile Include="MapGeneration\VanillaMapGen.cs" />
     <Compile Include="Network\Heartbeat-test.cs" />
+    <Compile Include="Player\Added\CPESupport.cs" />
+    <Compile Include="Player\Added\Player.CPE.cs" />
+    <Compile Include="Player\Added\Player.CPE2.cs" />
     <Compile Include="Player\SearchOptions.cs" />
     <Compile Include="Player\SecurityController.cs" />
+    <Compile Include="Utils\Added\Extensions.cs" />
+    <Compile Include="Utils\Added\Extensions2.cs" />
+    <Compile Include="Utils\Added\Paths.cs" />
+    <Compile Include="Utils\Added\PropertiesFile.cs" />
     <Compile Include="Utils\BitMap3D.cs" />
     <Compile Include="Utils\Paths.cs" />
     <Compile Include="System\Scheduler.cs" />
