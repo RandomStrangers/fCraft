@@ -23,7 +23,7 @@ namespace fCraft {
 
         public override void Write( string str ) {
             if( str == null ) throw new ArgumentNullException( "str" );
-            if( str.Length > 64 ) throw new ArgumentException( "String is too long (>64).", "str" );
+            if( str.Length > int.MaxValue ) throw new ArgumentException( "String is too long (>"+ int.MaxValue + ").", "str" );
             Write( Encoding.ASCII.GetBytes( str.PadRight( 64 ) ) );
         }
     }

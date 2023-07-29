@@ -205,7 +205,7 @@ namespace fCraft {
             Port = Server.Port;
             ProtocolVersion = Config.ProtocolVersion;
             Salt = Heartbeat.Salt;
-            SoftwareNameVersioned = Server.SoftwareNameVersioned;
+            SoftwareNameVersioned = Server.SoftwareNameVersioned2;
             ServerName = ConfigKey.ServerName.GetString();
             CustomData = new Dictionary<string, string>();
             HeartbeatUri = heartbeatUri;
@@ -254,7 +254,7 @@ namespace fCraft {
                 ProtocolVersion,
                 Uri.EscapeDataString(Salt),
                 Uri.EscapeDataString(ServerName),
-                Server.Software.Replace("&", "%26"));
+                Server.SoftwareNameVersioned);
             foreach (var pair in CustomData)
             {
                 sb.AppendFormat("&{0}={1}",

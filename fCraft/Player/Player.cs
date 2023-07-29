@@ -4,11 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
+using System.Reflection;
 using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Xml.Linq;
 using fCraft.Drawing;
 using fCraft.Events;
 using fCraft.MapGeneration;
@@ -42,6 +46,39 @@ namespace fCraft {
         public int customBlockSupportLevel;
         public bool extension;
         public bool loggedIn;
+        public Socket socket;
+        public static List<Player> players = new List<Player>();
+
+
+        void HandleLogin(byte[] message1)
+        {
+            {
+                //byte[] message = (byte[])m;
+                if (!loggedIn)
+                    return;
+                byte version = message1[0];
+                foreach (Player p in players)
+                {
+                    extension = true;
+                    SendExtInfo(14);
+                    SendExtEntry("ClickDistance", 1);
+                    SendExtEntry("CustomBlocks", 1);
+                    SendExtEntry("HeldBlock", 1);
+                    SendExtEntry("TextHotKey", 1);
+                    SendExtEntry("ExtPlayerList", 2);
+                    SendExtEntry("EnvColors", 1);
+                    SendExtEntry("SelectionCuboid", 1);
+                    SendExtEntry("BlockPermissions", 1);
+                    SendExtEntry("ChangeModel", 1);
+                    SendExtEntry("EnvMapAppearance", 1);
+                    SendExtEntry("EnvWeatherType", 1);
+                    SendExtEntry("HackControl", 1);
+                    SendExtEntry("EmoteFix", 1);
+                    SendExtEntry("LongerMessages", 1);
+                }
+            }
+            }
+
         public static int NTHO_Int(byte[] x, int offset)
         {
             byte[] y = new byte[4];
@@ -59,12 +96,14 @@ namespace fCraft {
             try
             {
                 int length = 0; byte msg = buffer[0];
+                byte[] message1 = new byte[length];
+
                 // Get the length of the message by checking the first byte
                 switch (msg)
                 {
                     case 0:
-                        length = 130;
-                        break; // login
+                        HandleLogin(message1);
+                        break;
                     case 5:
                         if (!loggedIn)
                             goto default;

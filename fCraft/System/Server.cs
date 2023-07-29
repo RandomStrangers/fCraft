@@ -28,7 +28,7 @@ namespace fCraft {
         public const string InternalVersion = "0.6.4.6";
         public static string Version { get { return InternalVersion; } }
 
-        public static string SoftwareName = "&4F&eC&aR&2A&bF&3T &70.6.4.6";
+        public static string SoftwareName = "&4F&eC&aR&2A&bF&3T &7";
         static string fullName;
         public static string SoftwareNameVersioned
         {
@@ -36,7 +36,14 @@ namespace fCraft {
             get { return fullName ?? SoftwareName + " " + Version; }
             set { fullName = value; }
         }
+        public static string SoftwareName2 = "MCGalaxy";
 
+        public static string SoftwareNameVersioned2
+        {
+            // By default, if SoftwareName gets externally changed, that is reflected in SoftwareNameVersioned too
+            get { return fullName ?? SoftwareName2 + " " + Version; }
+            set { fullName = value; }
+        }
         /// <summary> Software name that shows up on the server list on classicube.</summary>
         public static string Software = "&4F&eC&aR&2A&bF&3T &70.6.4.6";
 

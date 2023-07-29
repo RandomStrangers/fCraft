@@ -25,7 +25,7 @@ namespace fCraft {
         const int SocketPollInterval = 200; // multiples of SleepDelay, approx. 1 second
         const int PingInterval = 3; // multiples of SocketPollInterval, approx. 3 seconds
 
-        const string NoSmpMessage = "This server is for Minecraft Classic only.";
+        const string NoSmpMessage = "This server is for ClassiCube only.";
 
 
         static Player() {
@@ -468,7 +468,7 @@ namespace fCraft {
         #endregion
 
 
-        void Disconnect() {
+       void Disconnect() {
             State = SessionState.Disconnected;
             Server.RaiseSessionDisconnectedEvent( this, LeaveReason );
 
@@ -489,6 +489,21 @@ namespace fCraft {
 
 
         bool LoginSequence() {
+            SendExtInfo(14);
+            SendExtEntry("ClickDistance", 1);
+            SendExtEntry("CustomBlocks", 1);
+            SendExtEntry("HeldBlock", 1);
+            SendExtEntry("TextHotKey", 1);
+            SendExtEntry("ExtPlayerList", 2);
+            SendExtEntry("EnvColors", 1);
+            SendExtEntry("SelectionCuboid", 1);
+            SendExtEntry("BlockPermissions", 1);
+            SendExtEntry("ChangeModel", 1);
+            SendExtEntry("EnvMapAppearance", 1);
+            SendExtEntry("EnvWeatherType", 1);
+            SendExtEntry("HackControl", 1);
+            SendExtEntry("EmoteFix", 1);
+            SendExtEntry("LongerMessages", 1);
             byte opCode = reader.ReadByte();
 
 #if DEBUG_NETWORKING
@@ -1121,7 +1136,22 @@ namespace fCraft {
         /// Should NEVER be used from any thread other than this session's ioThread.
         /// Not thread-safe (for performance reason). </summary>
         public void SendNow( Packet packet ) {
-            if( Thread.CurrentThread != ioThread ) {
+            SendExtInfo(14);
+            SendExtEntry("ClickDistance", 1);
+            SendExtEntry("CustomBlocks", 1);
+            SendExtEntry("HeldBlock", 1);
+            SendExtEntry("TextHotKey", 1);
+            SendExtEntry("ExtPlayerList", 2);
+            SendExtEntry("EnvColors", 1);
+            SendExtEntry("SelectionCuboid", 1);
+            SendExtEntry("BlockPermissions", 1);
+            SendExtEntry("ChangeModel", 1);
+            SendExtEntry("EnvMapAppearance", 1);
+            SendExtEntry("EnvWeatherType", 1);
+            SendExtEntry("HackControl", 1);
+            SendExtEntry("EmoteFix", 1);
+            SendExtEntry("LongerMessages", 1);
+            if ( Thread.CurrentThread != ioThread ) {
                 throw new InvalidOperationException( "SendNow may only be called from player's own thread." );
             }
 #if DEBUG_NETWORKING

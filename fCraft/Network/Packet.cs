@@ -2,6 +2,11 @@
 using System;
 using System.Text;
 using JetBrains.Annotations;
+using System.Net.Sockets;
+using System.Security.Cryptography;
+using static fCraft.Player;
+using System.IO;
+using System.Threading;
 
 namespace fCraft {
     /// <summary> Packet struct, just a wrapper for a byte array. </summary>
@@ -36,13 +41,100 @@ namespace fCraft {
 
 
         #region Packet Making
+        static System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+        static MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider();
+        public static Socket socket;
 
+        public static void SendRaw(OpCode id)
+        {
+            SendRaw(id, new byte[0]);
+        }
+        public static void SendRaw(OpCode id, byte send)
+        {
+            SendRaw(id, new byte[] { send });
+        }
+
+         static void SendRaw(OpCode id, byte[] send)
+         {
+             // Abort if socket has been closed
+             if (socket == null || !socket.Connected)
+                 return;
+             byte[] buffer = new byte[send.Length + 1];
+             buffer[0] = (byte)id;
+             for (int i = 0; i < send.Length; i++)
+             {
+                 buffer[i + 1] = send[i];
+             }
+             try
+             {
+                 socket.BeginSend(buffer, 0, buffer.Length, SocketFlags.None, delegate (IAsyncResult result) { }, Block.Air);
+                 buffer = null;
+             }
+             catch (SocketException)
+             {
+                 buffer = null;
+             }
+         }
+        public static byte[] HTNO(ushort x)
+        {
+            byte[] y = BitConverter.GetBytes(x); Array.Reverse(y); return y;
+        }
+        public static ushort NTHO(byte[] x, int offset)
+        {
+            byte[] y = new byte[2];
+            Buffer.BlockCopy(x, offset, y, 0, 2); Array.Reverse(y);
+            return BitConverter.ToUInt16(y, 0);
+        }
+        public static byte[] HTNO(short x)
+        {
+            byte[] y = BitConverter.GetBytes(x); Array.Reverse(y); return y;
+        }
+
+        public static byte[] StringFormat(string str, int size)
+        {
+            byte[] bytes = new byte[size];
+            bytes = enc.GetBytes(str.PadRight(size).Substring(0, size));
+            return bytes;
+        }
+
+        public static void SendExtInfo(short count)
+        {
+            byte[] buffer = new byte[66];
+            StringFormat("Server software: " + Server.SoftwareNameVersioned, 64).CopyTo(buffer, 0);
+            HTNO(count).CopyTo(buffer, 64);
+            SendRaw(OpCode.ExtInfo, buffer);
+        }
+        public static void SendExtEntry(string name, int version)
+        {
+            byte[] version_ = BitConverter.GetBytes(version);
+            if (BitConverter.IsLittleEndian)
+                Array.Reverse(version_);
+            byte[] buffer = new byte[68];
+            StringFormat(name, 64).CopyTo(buffer, 0);
+            version_.CopyTo(buffer, 64);
+            SendRaw(OpCode.ExtEntry, buffer);
+        }
         public static Packet MakeHandshake( [NotNull] Player player, [NotNull] string serverName, [NotNull] string motd ) {
             if( player == null ) throw new ArgumentNullException( "player" );
             if( serverName == null ) throw new ArgumentNullException( "serverName" );
             if( motd == null ) throw new ArgumentNullException( "motd" );
 
             Packet packet = new Packet( OpCode.Handshake );
+            SendExtInfo(14);
+            SendExtEntry("ClickDistance", 1);
+            SendExtEntry("CustomBlocks", 1);
+            SendExtEntry("HeldBlock", 1);
+            SendExtEntry("TextHotKey", 1);
+            SendExtEntry("ExtPlayerList", 2);
+            SendExtEntry("EnvColors", 1);
+            SendExtEntry("SelectionCuboid", 1);
+            SendExtEntry("BlockPermissions", 1);
+            SendExtEntry("ChangeModel", 1);
+            SendExtEntry("EnvMapAppearance", 1);
+            SendExtEntry("EnvWeatherType", 1);
+            SendExtEntry("HackControl", 1);
+            SendExtEntry("EmoteFix", 1);
+            SendExtEntry("LongerMessages", 1);
             packet.Bytes[1] = Config.ProtocolVersion;
             Encoding.ASCII.GetBytes( serverName.PadRight( 64 ), 0, 64, packet.Bytes, 2 );
             Encoding.ASCII.GetBytes( motd.PadRight( 64 ), 0, 64, packet.Bytes, 66 );
